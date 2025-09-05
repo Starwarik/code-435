@@ -77,8 +77,18 @@ async def weather(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             await context.bot.send_message(chat_id=query.message.chat_id,
             text=f"❌ Произошла непредвиденная ошибка: {str(e)}")
 
+async def guide(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.callback_query.data == "guide":
+        query = update.callback_query
+        await update.callback_query.answer()
+        await context.bot.send_message(chat_id=query.message.chat_id,
+        text="Гид по городу Саратову позволит вам узнать о городе!")
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    keyboard = [[InlineKeyboardButton("Погода в Саратове", callback_data="conditions")]]
+    keyboard = [
+      [InlineKeyboardButton("Погода в Саратове", callback_data="conditions")],
+      [InlineKeyboardButton("Гид по городу", callback_data="guide")]
+      ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     welcome_text = (
         "👋 Добро пожаловать в Саратовский Гулливер!\n\n"
@@ -95,7 +105,8 @@ def main():
     
     # Добавляем обработчики команд
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(weather))
+    app.add_handler(CallbackQueryHandler(weather, pattern="^conditions$"))
+    app.add_handler(CallbackQueryHandler(guide, pattern="^guide$"))
     
     print("Бот запущен! Используйте /start для начала")
     app.run_polling()
