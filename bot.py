@@ -1,13 +1,18 @@
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 import requests
+import random
 import os
+from datetime import datetime
 
-# Настройки API - ЗАМЕНИТЕ НА ВАШ РЕАЛЬНЫЙ КЛЮЧ!
-OPENWEATHER_API_KEY = "a9490cc69b99d88eaa4d7507b356968f"  # ЗДЕСЬ ДОЛЖЕН БЫТЬ ВАШ КЛЮЧ OPENWEATHERMAP
+# Настройки API
+OPENWEATHER_API_KEY = "a9490cc69b99d88eaa4d7507b356968f"
 TELEGRAM_BOT_TOKEN = "8475963022:AAF6Cd_XZau_pBgmUuQVPUc9DnRAmCChfmw"
 CITY = "Saratov"
 COUNTRY_CODE = "RU"
+
+# Новый API для событий - TimePad
+TIMEPAD_API_URL = "https://api.timepad.ru/v1/events"
 
 async def weather(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.callback_query.data == "conditions":
@@ -83,16 +88,73 @@ async def guide(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.callback_query.answer()
         await context.bot.send_message(chat_id=query.message.chat_id,
         text="Гид по городу Саратову позволит вам узнать о городе!")
+        
+async def random_event(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.callback_query.data == "random_event":
+        query = update.callback_query
+        await update.callback_query.answer()
+        try:
+            params = {
+                'limit': 20,
+                'cities': 'Саратов',
+                'fields': 'name,description_short,starts_at,location,poster_image,url',
+                'sort': '+starts_at'
+            }
+            
+            headers = {
+                'Authorization': 'Bearer 1afd1183be12d044663e1c7d5634e0ffa563e0ff'
+            }
+            
+            response = requests.get(TIMEPAD_API_URL, params=params, headers=headers, timeout=10)
+            data = response.json()
+            
+            if response.status_code == 200 and data.get('values'):
+                event = random.choice(data['values'])
+                
+                event_message = f"🎭 {event['name']}\n\n"
+                if event.get('description_short'):
+                    event_message += f"{event['description_short'][:300]}...\n\n"
+                if event.get('starts_at'):
+                    event_date = datetime.fromisoformat(event['starts_at'].replace('Z', '+00:00'))
+                    event_message += f"📅 {event_date.strftime('%d.%m.%Y %H:%M')}\n"
+                if event.get('location', {}).get('city'):
+                    event_message += f"📍 {event['location']['city']}"
+                    if event.get('location', {}).get('address'):
+                        event_message += f", {event['location']['address']}\n"
+                    else:
+                        event_message += "\n"
+                if event.get('url'):
+                    event_message += f"🔗 {event['url']}"
+                
+                if event.get('poster_image'):
+                    await context.bot.send_photo(
+                        chat_id=query.message.chat_id,
+                        photo=event['poster_image']['default_url'],
+                        caption=event_message
+                    )
+                else:
+                    await context.bot.send_message(
+                        chat_id=query.message.chat_id,
+                        text=event_message
+                    )
+            else:
+                await context.bot.send_message(chat_id=query.message.chat_id,
+                                               text="❗ Не найдено событий в городе Саратов.")
+        except Exception as e:
+            await context.bot.send_message(
+                chat_id=query.message.chat_id,
+                text=f"Произошла ошибка при получении событий: {str(e)}"
+            )
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     keyboard = [
-      [InlineKeyboardButton("Погода в Саратове", callback_data="conditions")],
-      [InlineKeyboardButton("Гид по городу", callback_data="guide")]
-      ]
+        [InlineKeyboardButton("Погода в Саратове", callback_data="conditions")],
+        [InlineKeyboardButton("Гид по городу", callback_data="guide")],
+        [InlineKeyboardButton("Случайное событие", callback_data="random_event")]
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    welcome_text = (
-        "👋 Добро пожаловать в Саратовский Гулливер!\n\n"
-    )
+    welcome_text = "👋 Добро пожаловать в Саратовский Гулливер!\n\n"
     await update.message.reply_text(welcome_text, reply_markup=reply_markup)
 
 def main():
@@ -107,6 +169,7 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(weather, pattern="^conditions$"))
     app.add_handler(CallbackQueryHandler(guide, pattern="^guide$"))
+    app.add_handler(CallbackQueryHandler(random_event, pattern="^random_event$"))
     
     print("Бот запущен! Используйте /start для начала")
     app.run_polling()
