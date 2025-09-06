@@ -1,10 +1,11 @@
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto, InputMediaVideo
-from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram import Update, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardButton, KeyboardButton, InputMediaPhoto, InputMediaVideo
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 import requests
 import os
 
 # Настройки API - ЗАМЕНИТЕ НА ВАШ РЕАЛЬНЫЙ КЛЮЧ!
 OPENWEATHER_API_KEY = "a9490cc69b99d88eaa4d7507b356968f"  # ЗДЕСЬ ДОЛЖЕН БЫТЬ ВАШ КЛЮЧ OPENWEATHERMAP
+YANDEX_REQUEST_MAP_API_KEY = "27d46ff8-77d0-4b9f-9246-d3cb01e5ad9d"
 TELEGRAM_BOT_TOKEN_normal = "8475963022:AAF6Cd_XZau_pBgmUuQVPUc9DnRAmCChfmw"
 TELEGRAM_BOT_TOKEN = "5862928083:AAFjQ9YyeW3ohHtgNfBisW73-S87WB0QBSs"
 CITY = "Saratov"
@@ -77,6 +78,40 @@ async def weather(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         except Exception as e:
             await context.bot.send_message(chat_id=query.message.chat_id,
             text=f"❌ Произошла непредвиденная ошибка: {str(e)}")
+
+async def geo_permission(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.callback_query.data == "geopermission":
+        query = update.callback_query
+
+        keyboard = [[KeyboardButton("Моё местоположение", request_location=True)]]
+        reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
+
+        await query.answer()
+        await context.bot.send_message(chat_id=query.message.chat_id,
+        text="Я могу найти для тебя много интересных мест, но для этого ты должен предоставить мне своё текущее местоположение",
+        reply_markup=reply_markup)
+
+async def get_nearest_good_places(location, update, context):
+    span = f"{0.008984},{0.008984}" # 1 километр
+    params = {
+        "apikey": YANDEX_REQUEST_MAP_API_KEY,
+        "text": "Хорошие места для посещения",
+        "lang": "ru_RU",
+        "ll": f"{location.longitude},{location.latitude}",
+        "spn": span
+    }
+    response = requests.get("https://search-maps.yandex.ru/v1/", params=params)
+    await context.bot.send_message(chat_id=update.effective_chat.id,
+    text=f"{response} {response.url}")
+
+async def near_to_me(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    location = update.message.location
+    if location:
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+        text="Спасибо за твоё доверие ко мне! Держи шикарный список близких к тебе мест:",
+        reply_markup=ReplyKeyboardRemove())
+        await get_nearest_good_places(location, update, context)
+
 
 async def gorpark(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query.data == "gorpark":
@@ -197,7 +232,10 @@ async def circus(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     keyboard = [
       [InlineKeyboardButton("Погода в Саратове", callback_data="conditions")],
-      [InlineKeyboardButton("Гид по городу", callback_data="gorpark")]
+      [
+        InlineKeyboardButton("Гид по городу", callback_data="gorpark"),
+        InlineKeyboardButton("Что рядом?", callback_data="geopermission")
+      ]
       ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     welcome_text = (
@@ -216,6 +254,9 @@ def main():
     # Добавляем обработчики команд
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(weather, pattern="^conditions$"))
+    app.add_handler(CallbackQueryHandler(geo_permission, pattern="^geopermission$"))
+
+    # Краткий гид
     app.add_handler(CallbackQueryHandler(gorpark, pattern="^gorpark$"))
     app.add_handler(CallbackQueryHandler(nabka, pattern="^nabka$"))
     app.add_handler(CallbackQueryHandler(lipki, pattern="^lipki$"))
@@ -223,6 +264,7 @@ def main():
     app.add_handler(CallbackQueryHandler(conserva, pattern="^conserva$"))
     app.add_handler(CallbackQueryHandler(avenue, pattern="^avenue$"))
     app.add_handler(CallbackQueryHandler(circus, pattern="^circus$"))
+    app.add_handler(MessageHandler(filters.LOCATION, near_to_me))
 
     print("Бот запущен! Используйте /start для начала")
     app.run_polling()
