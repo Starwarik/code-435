@@ -5,7 +5,7 @@ import os
 
 # Настройки API - ЗАМЕНИТЕ НА ВАШ РЕАЛЬНЫЙ КЛЮЧ!
 OPENWEATHER_API_KEY = "a9490cc69b99d88eaa4d7507b356968f"  # ЗДЕСЬ ДОЛЖЕН БЫТЬ ВАШ КЛЮЧ OPENWEATHERMAP
-YANDEX_REQUEST_MAP_API_KEY = "27d46ff8-77d0-4b9f-9246-d3cb01e5ad9d"
+GEOAPIFY_API_KEY = "f92ae83e459f4e329a1bc1e2ba69ed39"
 TELEGRAM_BOT_TOKEN_normal = "8475963022:AAF6Cd_XZau_pBgmUuQVPUc9DnRAmCChfmw"
 TELEGRAM_BOT_TOKEN = "5862928083:AAFjQ9YyeW3ohHtgNfBisW73-S87WB0QBSs"
 CITY = "Saratov"
@@ -91,18 +91,49 @@ async def geo_permission(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         text="Я могу найти для тебя много интересных мест, но для этого ты должен предоставить мне своё текущее местоположение",
         reply_markup=reply_markup)
 
-async def get_nearest_good_places(location, update, context):
-    span = f"{0.008984},{0.008984}" # 1 километр
+def get_nearest_good_places(location, update, context):
     params = {
-        "apikey": YANDEX_REQUEST_MAP_API_KEY,
-        "text": "Хорошие места для посещения",
-        "lang": "ru_RU",
-        "ll": f"{location.longitude},{location.latitude}",
-        "spn": span
+        "apiKey": GEOAPIFY_API_KEY,
+        "filter": f"circle:{location.longitude},{location.latitude},2000",
+        "categories": "tourism,entertainment,catering,religion,leisure,natural,office.travel_agent, office.coworking",
+        "lang": "ru",
+        "limit": 30
     }
-    response = requests.get("https://search-maps.yandex.ru/v1/", params=params)
-    await context.bot.send_message(chat_id=update.effective_chat.id,
-    text=f"{response} {response.url}")
+    response = requests.get("https://api.geoapify.com/v2/places", params=params)
+    return response.json()
+
+def get_place_information(places):
+    print(places)
+    places_fin = []
+    for place in places["features"]:
+        properties = place["properties"]
+        try:
+            name = properties["name"]
+            district = properties["district"]
+            suburb = properties["suburb"]
+            street = properties["street"]
+            housenumber = properties["housenumber"]
+            contact = properties["contact"]
+        except:
+            continue
+
+        address_string = ", ".join([district, suburb, street, housenumber])
+        place_string = "\n\t".join([name, address_string])
+        places_fin.append(place_string)
+    return places_fin
+
+def check_repetition(places):
+    tmp = None
+    places_fin = []
+    for place in places:
+        if tmp == None:
+            tmp = place
+            places_fin.append(tmp)
+            continue
+        if place["name"] == tmp["name"]:
+            continue
+        places_fin.append(place)
+        tmp = place
 
 async def near_to_me(update: Update, context: ContextTypes.DEFAULT_TYPE):
     location = update.message.location
@@ -110,7 +141,11 @@ async def near_to_me(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(chat_id=update.effective_chat.id,
         text="Спасибо за твоё доверие ко мне! Держи шикарный список близких к тебе мест:",
         reply_markup=ReplyKeyboardRemove())
-        await get_nearest_good_places(location, update, context)
+        places = get_nearest_good_places(location, update, context)
+        places = get_place_information(places)
+        for i in range(len(places)+1):
+            await context.bot.send_message(chat_id=update.effective_chat.id,
+            text=f"Место {i+1}:\n\t{places[i-1]}")
 
 
 async def gorpark(update: Update, context: ContextTypes.DEFAULT_TYPE):
