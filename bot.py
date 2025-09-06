@@ -142,7 +142,8 @@ async def random_event(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def gorpark(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query.data == "gorpark":
         keyboard = [
-        [InlineKeyboardButton("Дальше", callback_data="nabka")]
+            [InlineKeyboardButton("Меню", callback_data="start")],
+            [InlineKeyboardButton("Дальше", callback_data="nabka")]
         ]
         query = update.callback_query
         await update.callback_query.answer()
@@ -153,23 +154,26 @@ async def gorpark(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text="Гид по городу Саратову позволит вам узнать о городе!")
 
         await context.bot.send_photo(chat_id=query.message.chat_id,
-        photo="https://pp.vk.me/c628225/v628225107/26cd5/wAqYn5ApXOQ.jpg")
+        photo="https://pp.vk.me/c628225/v628225107/26cd5/wAqYn5ApXOQ.jpg",
+        caption="Подождите немного, видео загружается...")
         await context.bot.send_video(chat_id=query.message.chat_id,
         video="gorpark.mp4",
         caption="Горпарк это шикарное место",
-				reply_markup=reply_markup)
+		reply_markup=reply_markup)
 
 async def nabka(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query.data == "nabka":
         keyboard = [
-        [InlineKeyboardButton("Назад", callback_data="gorpark"), InlineKeyboardButton("Дальше", callback_data="lipki")]
+            [InlineKeyboardButton("Меню", callback_data="start")],
+            [InlineKeyboardButton("Назад", callback_data="gorpark"), InlineKeyboardButton("Дальше", callback_data="lipki")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         query = update.callback_query
         await update.callback_query.answer()
 
         await context.bot.send_photo(chat_id=query.message.chat_id,
-        photo="https://saratov.travel/upload/resize_cache/iblock/727/800_800_1/6kexsl38l39dqiqo8xvcyzhlk5oh3qit.jpg")
+        photo="https://saratov.travel/upload/resize_cache/iblock/727/800_800_1/6kexsl38l39dqiqo8xvcyzhlk5oh3qit.jpg",
+        caption="Подождите немного, видео загружается...")
         await context.bot.send_video(chat_id=query.message.chat_id,
         video="nabka.mp4",
         caption="А набережная это вообще отпад!",
@@ -178,14 +182,16 @@ async def nabka(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def lipki(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query.data == "lipki":
         keyboard = [
-        [InlineKeyboardButton("Назад", callback_data="nabka"), InlineKeyboardButton("Дальше", callback_data="utoli")]
+            [InlineKeyboardButton("Меню", callback_data="start")],
+            [InlineKeyboardButton("Назад", callback_data="nabka"), InlineKeyboardButton("Дальше", callback_data="utoli")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         query = update.callback_query
         await update.callback_query.answer()
 
         await context.bot.send_photo(chat_id=query.message.chat_id,
-        photo="https://img.tourister.ru/files/3/3/9/1/7/5/1/0/2/original.jpg")
+        photo="https://img.tourister.ru/files/3/3/9/1/7/5/1/0/2/original.jpg",
+        caption="Подождите немного, видео загружается...")
         await context.bot.send_video(chat_id=query.message.chat_id,
         video="lipki.mp4",
         caption="А липки это вообще отпад!",
@@ -194,14 +200,16 @@ async def lipki(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def utoli(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query.data == "utoli":
         keyboard = [
-        [InlineKeyboardButton("Назад", callback_data="lipki"), InlineKeyboardButton("Дальше", callback_data="conserva")]
+            [InlineKeyboardButton("Меню", callback_data="start")],
+            [InlineKeyboardButton("Назад", callback_data="lipki"), InlineKeyboardButton("Дальше", callback_data="conserva")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         query = update.callback_query
         await update.callback_query.answer()
 
         await context.bot.send_photo(chat_id=query.message.chat_id,
-        photo="https://cdn-imgproxy.mamado.su/7u7PXEMY0t4nQlCVI-XgWcDomrKi-dObs_pLLDpPVBA/rs:fit:2000:2000:1/g:ce/q:90/czM6Ly9tYW1hZG8t/YXBpLXByb2R1Y3Rp/b24vc3RvcmFnZS8x/Mjc3MTczL1NjcmVl/bnNob3RfMy5wbmc.webp")
+        photo="https://cdn-imgproxy.mamado.su/7u7PXEMY0t4nQlCVI-XgWcDomrKi-dObs_pLLDpPVBA/rs:fit:2000:2000:1/g:ce/q:90/czM6Ly9tYW1hZG8t/YXBpLXByb2R1Y3Rp/b24vc3RvcmFnZS8x/Mjc3MTczL1NjcmVl/bnNob3RfMy5wbmc.webp",
+        caption="Подождите немного, видео загружается...")
         await context.bot.send_video(chat_id=query.message.chat_id,
         video="utoli.mp4",
         caption="А утоли это вообще отпад!",
@@ -210,14 +218,16 @@ async def utoli(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def conserva(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query.data == "conserva":
         keyboard = [
-        [InlineKeyboardButton("Назад", callback_data="utoli"), InlineKeyboardButton("Дальше", callback_data="avenue")]
+            [InlineKeyboardButton("Меню", callback_data="start")],
+            [InlineKeyboardButton("Назад", callback_data="utoli"), InlineKeyboardButton("Дальше", callback_data="avenue")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         query = update.callback_query
         await update.callback_query.answer()
 
         await context.bot.send_photo(chat_id=query.message.chat_id,
-        photo="https://static.gorodzovet.ru/uploads/venue/venuelogo-2903106.jpg?v=")
+        photo="https://static.gorodzovet.ru/uploads/venue/venuelogo-2903106.jpg?v=",
+        caption="Подождите немного, видео загружается...")
         await context.bot.send_video(chat_id=query.message.chat_id,
         video="conserva.mp4",
         caption="А консерватория это вообще отпад!",
@@ -226,7 +236,8 @@ async def conserva(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def avenue(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query.data == "avenue":
         keyboard = [
-        [InlineKeyboardButton("Назад", callback_data="conserva"), InlineKeyboardButton("Дальше", callback_data="circus")]
+            [InlineKeyboardButton("Меню", callback_data="start")],
+            [InlineKeyboardButton("Назад", callback_data="conserva"), InlineKeyboardButton("Дальше", callback_data="circus")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         query = update.callback_query
@@ -242,7 +253,8 @@ async def avenue(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def circus(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query.data == "circus":
         keyboard = [
-        [InlineKeyboardButton("Назад", callback_data="avenue")]
+            [InlineKeyboardButton("Меню", callback_data="start")],
+            [InlineKeyboardButton("Назад", callback_data="avenue")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         query = update.callback_query
@@ -255,7 +267,7 @@ async def circus(update: Update, context: ContextTypes.DEFAULT_TYPE):
         video="circus.mp4",
         caption="А цирк это вообще отпад!")
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     keyboard = [
         [InlineKeyboardButton("Погода в Саратове", callback_data="conditions")],
         [InlineKeyboardButton("Гид по городу", callback_data="gorpark")],
@@ -264,6 +276,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     reply_markup = InlineKeyboardMarkup(keyboard)
     welcome_text = "👋 Добро пожаловать в Саратовский Гулливер!\n\n"
     await update.message.reply_text(welcome_text, reply_markup=reply_markup)
+
+async def start_return(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.callback_query.data == "start":
+        query = update.callback_query
+        keyboard = [
+            [InlineKeyboardButton("Погода в Саратове", callback_data="conditions")],
+            [InlineKeyboardButton("Гид по городу", callback_data="gorpark")],
+            [InlineKeyboardButton("Случайное событие", callback_data="random_event")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        welcome_text = "👋 Добро пожаловать в главное меню!\n\n"
+        await query.answer()
+        await query.message.reply_text(welcome_text, reply_markup=reply_markup)
 
 def main():
     print("Запуск бота...")
@@ -274,7 +299,8 @@ def main():
     app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
     
     # Добавляем обработчики команд
-    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("start", start_command))
+    app.add_handler(CallbackQueryHandler(start_return, pattern="^start$"))
     
     app.add_handler(CallbackQueryHandler(weather, pattern="^conditions$"))
     app.add_handler(CallbackQueryHandler(random_event, pattern="^random_event$"))
