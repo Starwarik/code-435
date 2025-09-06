@@ -1,4 +1,4 @@
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto, InputMediaVideo
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 import requests
 import random
@@ -13,6 +13,34 @@ COUNTRY_CODE = "RU"
 
 # Новый API для событий - TimePad
 TIMEPAD_API_URL = "https://api.timepad.ru/v1/events"
+
+QUIZ_QUESTIONS = [
+    {
+        "question": "В каком году был основан Саратов?",
+        "options": ["1590", "1690", "1790", "1890"],
+        "correct": 0
+    },
+    {
+        "question": "Какая река протекает в Саратове?",
+        "options": ["Волга", "Дон", "Кама", "Ока"],
+        "correct": 0
+    },
+    {
+        "question": "Какой мост в Саратове является самым длинным в Европе?",
+        "options": ["Московский", "Саратовский мост", "Татищевский", "Энгельсский"],
+        "correct": 1
+    },
+    {
+        "question": "Какой из этих театров находится в Саратове?",
+        "options": ["Большой театр", "Мариинский театр", "Театр оперы и балета", "Театр драмы"],
+        "correct": 2
+    },
+    {
+        "question": "Какой университет в Саратове является одним из старейших в России?",
+        "options": ["СГУ", "СГТУ", "СГАУ", "СГМУ"],
+        "correct": 0
+    }
+]
 
 async def weather(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.callback_query.data == "conditions":
@@ -81,13 +109,6 @@ async def weather(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         except Exception as e:
             await context.bot.send_message(chat_id=query.message.chat_id,
             text=f"❌ Произошла непредвиденная ошибка: {str(e)}")
-
-async def guide(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.callback_query.data == "guide":
-        query = update.callback_query
-        await update.callback_query.answer()
-        await context.bot.send_message(chat_id=query.message.chat_id,
-        text="Гид по городу Саратову позволит вам узнать о городе!")
         
 async def random_event(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query.data == "random_event":
@@ -146,16 +167,248 @@ async def random_event(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 text=f"Произошла ошибка при получении событий: {str(e)}"
             )
 
+async def gorpark(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.callback_query.data == "gorpark":
+        keyboard = [
+            [InlineKeyboardButton("Меню", callback_data="start")],
+            [InlineKeyboardButton("Дальше", callback_data="nabka")]
+        ]
+        query = update.callback_query
+        await update.callback_query.answer()
+        
+        reply_markup = InlineKeyboardMarkup(keyboard)
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        await context.bot.send_message(chat_id=query.message.chat_id,
+        text="Гид по городу Саратову позволит вам узнать о городе!")
+
+        await context.bot.send_photo(chat_id=query.message.chat_id,
+        photo="https://pp.vk.me/c628225/v628225107/26cd5/wAqYn5ApXOQ.jpg",
+        caption="Подождите немного, видео загружается...")
+        await context.bot.send_video(chat_id=query.message.chat_id,
+        video="gorpark.mp4",
+        caption="Горпарк это шикарное место",
+		reply_markup=reply_markup)
+
+async def nabka(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.callback_query.data == "nabka":
+        keyboard = [
+            [InlineKeyboardButton("Меню", callback_data="start")],
+            [InlineKeyboardButton("Назад", callback_data="gorpark"), InlineKeyboardButton("Дальше", callback_data="lipki")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query = update.callback_query
+        await update.callback_query.answer()
+
+        await context.bot.send_photo(chat_id=query.message.chat_id,
+        photo="https://saratov.travel/upload/resize_cache/iblock/727/800_800_1/6kexsl38l39dqiqo8xvcyzhlk5oh3qit.jpg",
+        caption="Подождите немного, видео загружается...")
+        await context.bot.send_video(chat_id=query.message.chat_id,
+        video="nabka.mp4",
+        caption="А набережная это вообще отпад!",
+        reply_markup=reply_markup)
+
+async def lipki(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.callback_query.data == "lipki":
+        keyboard = [
+            [InlineKeyboardButton("Меню", callback_data="start")],
+            [InlineKeyboardButton("Назад", callback_data="nabka"), InlineKeyboardButton("Дальше", callback_data="utoli")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query = update.callback_query
+        await update.callback_query.answer()
+
+        await context.bot.send_photo(chat_id=query.message.chat_id,
+        photo="https://img.tourister.ru/files/3/3/9/1/7/5/1/0/2/original.jpg",
+        caption="Подождите немного, видео загружается...")
+        await context.bot.send_video(chat_id=query.message.chat_id,
+        video="lipki.mp4",
+        caption="А липки это вообще отпад!",
+        reply_markup=reply_markup)
+
+async def utoli(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.callback_query.data == "utoli":
+        keyboard = [
+            [InlineKeyboardButton("Меню", callback_data="start")],
+            [InlineKeyboardButton("Назад", callback_data="lipki"), InlineKeyboardButton("Дальше", callback_data="conserva")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query = update.callback_query
+        await update.callback_query.answer()
+
+        await context.bot.send_photo(chat_id=query.message.chat_id,
+        photo="https://cdn-imgproxy.mamado.su/7u7PXEMY0t4nQlCVI-XgWcDomrKi-dObs_pLLDpPVBA/rs:fit:2000:2000:1/g:ce/q:90/czM6Ly9tYW1hZG8t/YXBpLXByb2R1Y3Rp/b24vc3RvcmFnZS8x/Mjc3MTczL1NjcmVl/bnNob3RfMy5wbmc.webp",
+        caption="Подождите немного, видео загружается...")
+        await context.bot.send_video(chat_id=query.message.chat_id,
+        video="utoli.mp4",
+        caption="А утоли это вообще отпад!",
+        reply_markup=reply_markup)
+
+async def conserva(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.callback_query.data == "conserva":
+        keyboard = [
+            [InlineKeyboardButton("Меню", callback_data="start")],
+            [InlineKeyboardButton("Назад", callback_data="utoli"), InlineKeyboardButton("Дальше", callback_data="avenue")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query = update.callback_query
+        await update.callback_query.answer()
+
+        await context.bot.send_photo(chat_id=query.message.chat_id,
+        photo="https://static.gorodzovet.ru/uploads/venue/venuelogo-2903106.jpg?v=",
+        caption="Подождите немного, видео загружается...")
+        await context.bot.send_video(chat_id=query.message.chat_id,
+        video="conserva.mp4",
+        caption="А консерватория это вообще отпад!",
+        reply_markup=reply_markup)
+
+async def avenue(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.callback_query.data == "avenue":
+        keyboard = [
+            [InlineKeyboardButton("Меню", callback_data="start")],
+            [InlineKeyboardButton("Назад", callback_data="conserva"), InlineKeyboardButton("Дальше", callback_data="circus")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query = update.callback_query
+        await update.callback_query.answer()
+
+        await context.bot.send_photo(chat_id=query.message.chat_id,
+        photo="https://www.tursar.ru/uploads/img361_5.jpg",
+        reply_markup=reply_markup)
+        await context.bot.send_video(chat_id=query.message.chat_id,
+        video="avenue.mp4",
+        caption="А проспект это вообще отпад!")
+
+async def circus(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.callback_query.data == "circus":
+        keyboard = [
+            [InlineKeyboardButton("Меню", callback_data="start")],
+            [InlineKeyboardButton("Назад", callback_data="avenue")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query = update.callback_query
+        await update.callback_query.answer()
+
+        await context.bot.send_photo(chat_id=query.message.chat_id,
+        photo="https://upload.wikimedia.org/wikipedia/commons/6/66/%D0%A6%D0%B8%D1%80%D0%BA_%D0%B2_%D0%A1%D0%B0%D1%80%D0%B0%D1%82%D0%BE%D0%B2%D0%B5.jpg",
+        reply_markup=reply_markup)
+        await context.bot.send_video(chat_id=query.message.chat_id,
+        video="circus.mp4",
+        caption="А цирк это вообще отпад!")
+
+async def quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.callback_query.data == "quiz":
+        query = update.callback_query
+        await update.callback_query.answer()
+        
+        # Инициализируем или сбрасываем состояние викторины
+        context.user_data['quiz_score'] = 0
+        context.user_data['quiz_question'] = 0
+        
+        await send_question(update, context)
+
+async def send_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_data = context.user_data
+    question_index = user_data.get('quiz_question', 0)
+    
+    if question_index >= len(QUIZ_QUESTIONS):
+        # Викторина завершена
+        score = user_data.get('quiz_score', 0)
+        total = len(QUIZ_QUESTIONS)
+        
+        message = f"🎉 Викторина завершена!\n\nВаш результат: {score}/{total}\n\n"
+        
+        if score == total:
+            message += "Поздравляем! Вы отлично знаете Саратов! 🏆"
+        elif score >= total / 2:
+            message += "Хороший результат! Вы неплохо знаете город! 👍"
+        else:
+            message += "Стоит больше узнать о Саратове! Исследуйте город с нашим гидом! 🗺️"
+        
+        keyboard = [
+            [InlineKeyboardButton("Главное меню", callback_data="start_return")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        query = update.callback_query
+        await context.bot.send_message(
+            chat_id=query.message.chat_id,
+            text=message,
+            reply_markup=reply_markup
+        )
+        return
+    
+    question_data = QUIZ_QUESTIONS[question_index]
+    keyboard = []
+    
+    for i, option in enumerate(question_data["options"]):
+        keyboard.append([InlineKeyboardButton(option, callback_data=f"quiz_answer_{i}")])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    query = update.callback_query
+    await context.bot.send_message(
+        chat_id=query.message.chat_id,
+        text=f"❓ Вопрос {question_index + 1}/{len(QUIZ_QUESTIONS)}:\n\n{question_data['question']}",
+        reply_markup=reply_markup
+    )
+
+async def quiz_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    user_data = context.user_data
+    question_index = user_data.get('quiz_question', 0)
+    
+    if question_index >= len(QUIZ_QUESTIONS):
+        return
+    
+    # Получаем выбранный ответ
+    answer_index = int(query.data.split('_')[2])
+    correct_index = QUIZ_QUESTIONS[question_index]["correct"]
+    
+    # Проверяем ответ
+    if answer_index == correct_index:
+        user_data['quiz_score'] = user_data.get('quiz_score', 0) + 1
+        message = "✅ Правильно! Молодец!"
+    else:
+        correct_answer = QUIZ_QUESTIONS[question_index]["options"][correct_index]
+        message = f"❌ Неправильно. Правильный ответ: {correct_answer}"
+    
+    # Увеличиваем счетчик вопросов
+    user_data['quiz_question'] = question_index + 1
+    
+    # Отправляем результат и следующий вопрос
+    await context.bot.send_message(
+        chat_id=query.message.chat_id,
+        text=message
+    )
+    
+    await send_question(update, context)        
+
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     keyboard = [
         [InlineKeyboardButton("Погода в Саратове", callback_data="conditions")],
-        [InlineKeyboardButton("Гид по городу", callback_data="guide")],
-        [InlineKeyboardButton("Случайное событие", callback_data="random_event")]
+        [InlineKeyboardButton("Гид по городу", callback_data="gorpark")],
+        [InlineKeyboardButton("Случайное событие", callback_data="random_event")],
+        [InlineKeyboardButton("Викторина о Саратове", callback_data="quiz")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     welcome_text = "👋 Добро пожаловать в Саратовский Гулливер!\n\n"
     await update.message.reply_text(welcome_text, reply_markup=reply_markup)
+
+async def start_return(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.callback_query.data == "start":
+        query = update.callback_query
+        keyboard = [
+            [InlineKeyboardButton("Погода в Саратове", callback_data="conditions")],
+            [InlineKeyboardButton("Гид по городу", callback_data="gorpark")],
+            [InlineKeyboardButton("Случайное событие", callback_data="random_event")],
+            [InlineKeyboardButton("Викторина о Саратове", callback_data="quiz")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        welcome_text = "👋 Добро пожаловать в главное меню!\n\n"
+        await query.answer()
+        await query.message.reply_text(welcome_text, reply_markup=reply_markup)
 
 def main():
     print("Запуск бота...")
@@ -166,10 +419,23 @@ def main():
     app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
     
     # Добавляем обработчики команд
-    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("start", start_command))
+    app.add_handler(CallbackQueryHandler(start_return, pattern="^start$"))
+    
     app.add_handler(CallbackQueryHandler(weather, pattern="^conditions$"))
-    app.add_handler(CallbackQueryHandler(guide, pattern="^guide$"))
     app.add_handler(CallbackQueryHandler(random_event, pattern="^random_event$"))
+
+    app.add_handler(CallbackQueryHandler(gorpark, pattern="^gorpark$"))
+    app.add_handler(CallbackQueryHandler(nabka, pattern="^nabka$"))
+    app.add_handler(CallbackQueryHandler(lipki, pattern="^lipki$"))
+    app.add_handler(CallbackQueryHandler(utoli, pattern="^utoli$"))
+    app.add_handler(CallbackQueryHandler(conserva, pattern="^conserva$"))
+    app.add_handler(CallbackQueryHandler(avenue, pattern="^avenue$"))
+    app.add_handler(CallbackQueryHandler(circus, pattern="^circus$"))
+
+    app.add_handler(CallbackQueryHandler(quiz, pattern="^quiz$"))
+    app.add_handler(CallbackQueryHandler(quiz_answer, pattern="^quiz_answer_"))
+    app.add_handler(CallbackQueryHandler(start_return, pattern="^start_return$"))
     
     print("Бот запущен! Используйте /start для начала")
     app.run_polling()
